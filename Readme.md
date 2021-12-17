@@ -51,7 +51,7 @@ rosrun rqt_reconfigure rqt_reconfigure
 # Real world test
 In real world tests, do not use auto arm with code. Always arm and change mode with a remote controller.
 
-## Run tracker in a laptop
+## Run pva_tracker in a laptop
 In this case, you connect your laptop with your drone via wifi/telemetry and Mavros. The estimated position and velocity are given by optitrack system.
 
 Run the following to start tracker and takeoff the drone when the mode is turned to "offboard".
@@ -69,7 +69,7 @@ run the following to fly to x=3 with minimum jerk trajectory (tracker must be st
 rosrun pva_tracker optitrack_control_test
 ```
 
-## Run tracker in an onboard computer
+## Run pva_tracker in an onboard computer
 In this case, you connect your onboard computer with your flight controller via usb_to_ttl module and Mavros. The estimated position and velocity are given by tracking camera, SLAM algorithms, or optitrack system. 
 
 Run the following to start tracker:
