@@ -59,6 +59,8 @@ Run the following to start tracker and takeoff the drone when the mode is turned
 rosrun pva_tracker tracker_auto_takeoff_optitrack
 ```
 
+Now turn the flight mode to "OFFBOARD". The drone will take off, hover and wait for commands. Here we provide two nodes to generate some simple commands.
+
 run the following to hover (tracker must be started first)
 ```
 rosrun pva_tracker optitrack_hover_test
