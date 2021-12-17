@@ -1,0 +1,45 @@
+!!python/object/new:dynamic_reconfigure.encoding.Config
+dictitems:
+  groups: !!python/object/new:dynamic_reconfigure.encoding.Config
+    dictitems:
+      groups: !!python/object/new:dynamic_reconfigure.encoding.Config
+        state: []
+      hover_thrust_factor: 0.0341
+      id: 0
+      name: Default
+      p_i_acc_error_limit: 0.3
+      parameters: !!python/object/new:dynamic_reconfigure.encoding.Config
+        state: []
+      parent: 0
+      position_d_xy: 0.08
+      position_d_z: 0.05
+      position_i_xy: 0.05
+      position_i_z: 0.1
+      position_p_xy: 1.0
+      position_p_z: 1.5
+      state: true
+      type: ''
+      v_i_acc_error_limit: 0.2
+      velocity_d_xy: 0.01
+      velocity_d_z: 0.01
+      velocity_i_xy: 0.04
+      velocity_i_z: 0.1
+      velocity_p_xy: 0.25
+      velocity_p_z: 0.25
+    state: []
+  hover_thrust_factor: 0.0341
+  p_i_acc_error_limit: 0.3
+  position_d_xy: 0.08
+  position_d_z: 0.05
+  position_i_xy: 0.05
+  position_i_z: 0.1
+  position_p_xy: 1.0
+  position_p_z: 1.5
+  v_i_acc_error_limit: 0.2
+  velocity_d_xy: 0.01
+  velocity_d_z: 0.01
+  velocity_i_xy: 0.04
+  velocity_i_z: 0.1
+  velocity_p_xy: 0.25
+  velocity_p_z: 0.25
+state: []

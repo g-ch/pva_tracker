@@ -1,0 +1,51 @@
+!!python/object/new:dynamic_reconfigure.encoding.Config
+dictitems:
+  flight_time_minute: 5.0
+  groups: !!python/object/new:dynamic_reconfigure.encoding.Config
+    dictitems:
+      flight_time_minute: 5.0
+      groups: !!python/object/new:dynamic_reconfigure.encoding.Config
+        state: []
+      hover_thrust_factor_max: 0.06
+      hover_thrust_factor_min: 0.057
+      id: 0
+      name: Default
+      p_i_acc_error_limit: 0.2
+      parameters: !!python/object/new:dynamic_reconfigure.encoding.Config
+        state: []
+      parent: 0
+      position_d_xy: 0.1
+      position_d_z: 0.06
+      position_i_xy: 0.08
+      position_i_z: 0.1
+      position_p_xy: 1.0
+      position_p_z: 1.05
+      stand_by_time_minute: 30.0
+      state: true
+      type: ''
+      v_i_acc_error_limit: 0.2
+      velocity_d_xy: 0.1
+      velocity_d_z: 0.1
+      velocity_i_xy: 0.06
+      velocity_i_z: 0.1
+      velocity_p_xy: 0.2
+      velocity_p_z: 0.4
+    state: []
+  hover_thrust_factor_max: 0.06
+  hover_thrust_factor_min: 0.057
+  p_i_acc_error_limit: 0.2
+  position_d_xy: 0.1
+  position_d_z: 0.06
+  position_i_xy: 0.08
+  position_i_z: 0.1
+  position_p_xy: 1.0
+  position_p_z: 1.05
+  stand_by_time_minute: 30.0
+  v_i_acc_error_limit: 0.2
+  velocity_d_xy: 0.1
+  velocity_d_z: 0.1
+  velocity_i_xy: 0.06
+  velocity_i_z: 0.1
+  velocity_p_xy: 0.2
+  velocity_p_z: 0.4
+state: []
