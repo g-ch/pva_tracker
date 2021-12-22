@@ -49,18 +49,15 @@ add_dependencies(tracker_sim_auto_arm_takeoff ${PROJECT_NAME}_gencfg)
 add_executable(sim_control_test src/sim_control_test.cpp)
 target_link_libraries(sim_control_test ${catkin_LIBRARIES})
 
-add_executable(real_control_test src/real_control_test.cpp)
-target_link_libraries(real_control_test ${catkin_LIBRARIES})
+add_executable(real_control_test_optimal_jerk src/real_control_test_optimal_jerk.cpp)
+target_link_libraries(real_control_test_optimal_jerk ${catkin_LIBRARIES})
 
 
 add_executable(sim_hover_test src/sim_hover_test.cpp)
 target_link_libraries(sim_hover_test ${catkin_LIBRARIES})
 
-add_executable(optitrack_hover_test src/optitrack_hover_test.cpp)
-target_link_libraries(optitrack_hover_test ${catkin_LIBRARIES})
-
-add_executable(optitrack_control_test src/optitrack_control_test.cpp)
-target_link_libraries(optitrack_control_test ${catkin_LIBRARIES})
+add_executable(fake_bebop_odom_generator src/fake_bebop_odom_generator.cpp)
+target_link_libraries(fake_bebop_odom_generator ${catkin_LIBRARIES})
 
 
 

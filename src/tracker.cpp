@@ -14,6 +14,7 @@
 #include <nav_msgs/Odometry.h>
 #include <mavros_msgs/State.h>
 
+
 #define GRAVITATIONAL_ACC 9.81
 
 mavros_msgs::State current_state;
@@ -145,11 +146,11 @@ void pvaCallback(const trajectory_msgs::JointTrajectoryPoint::ConstPtr& msg)
 
     Eigen::Vector3d body_x, body_y, body_z;
     if (expected_thrust.norm() > 0.00001f) {
-            body_z = expected_thrust / expected_thrust.norm();  //Normalize
-    } else {
-            // no thrust, set Z axis to safe value
-            body_z << 0.f, 0.f, 1.f;
-    }
+                body_z = expected_thrust / expected_thrust.norm();  //Normalize
+        } else {
+                // no thrust, set Z axis to safe value
+                body_z << 0.f, 0.f, 1.f;
+        }
 
         // vector of desired yaw direction in XY plane rotated by PI/2
     Eigen::Vector3d y_C(-sin(expected_yaw), cos(expected_yaw), 0.0f); // ???? chg
@@ -207,24 +208,16 @@ void pvaCallback(const trajectory_msgs::JointTrajectoryPoint::ConstPtr& msg)
 
 double last_time = 0.0;
 bool time_counter_initialized = false;
+
 void positionCallback(const geometry_msgs::PoseStamped::ConstPtr &msg)
 {
-    /// NWU frame to ENU frame
-    current_p << -msg->pose.position.y, msg->pose.position.x, msg->pose.position.z;
+    /// ENU frame
+    current_p << msg->pose.position.x, msg->pose.position.y, msg->pose.position.z;
     current_att.w() = msg->pose.orientation.w;
     current_att.x() = msg->pose.orientation.x;
     current_att.y() = msg->pose.orientation.y;
     current_att.z() = msg->pose.orientation.z;
 
-    Eigen::Quaterniond axis; //= quad * q1 * quad.inverse();
-    axis.w() = cos(M_PI/2.0);
-    axis.x() = 0.0;
-    axis.y() = 0.0;
-    axis.z() = sin(M_PI/2.0);
-    current_att = current_att * axis;
-
-    ROS_INFO_THROTTLE(2, "att=(%f, %f, %f, %f)", current_att.w(), current_att.x(), current_att.y(), current_att.z());
-    
     if(!time_counter_initialized){
         last_time = ros::Time::now().toSec();
         time_counter_initialized = true;
@@ -235,7 +228,7 @@ void positionCallback(const geometry_msgs::PoseStamped::ConstPtr &msg)
             stand_by_time_second += ros::Time::now().toSec() - last_time;
         }
         last_time = ros::Time::now().toSec();
-        double coeff_stand_by_time_to_flight_time = max_flight_time / max_stand_by_time; 
+        double coeff_stand_by_time_to_flight_time = max_flight_time / max_stand_by_time;
         thrust_factor = thrust_factor_min + (thrust_factor_max-thrust_factor_min)*(flight_time_second / 60.0 + stand_by_time_second / 60.0*coeff_stand_by_time_to_flight_time) / max_flight_time;
         if(thrust_factor > thrust_factor_max) thrust_factor = thrust_factor_max;
     }
@@ -245,8 +238,8 @@ void positionCallback(const geometry_msgs::PoseStamped::ConstPtr &msg)
 
 void velocityCallback(const geometry_msgs::TwistStamped::ConstPtr &msg)
 {
-    /// NWU frame to ENU frame
-    current_v << -msg->twist.linear.y, msg->twist.linear.x, msg->twist.linear.z;
+    /// ENU frame
+    current_v << msg->twist.linear.x, msg->twist.linear.y, msg->twist.linear.z;
 }
 
 
@@ -280,8 +273,10 @@ int main(int argc, char** argv) {
     ros::NodeHandle nh;
     ros::Subscriber state_sub = nh.subscribe<mavros_msgs::State>("/mavros/state", 1, stateCallback);
     ros::Subscriber pva_sub = nh.subscribe("/pva_setpoint", 1, pvaCallback);
-    ros::Subscriber position_sub = nh.subscribe("/vrpn_client_node/drone/pose", 1, positionCallback);
-    ros::Subscriber velocity_sub = nh.subscribe("/vrpn_client_node/drone/twist", 1, velocityCallback);
+    ros::Subscriber position_sub = nh.subscribe("/mavros/local_position/pose", 1, positionCallback);
+    ros::Subscriber velocity_sub = nh.subscribe("/mavros/local_position/velocity_local", 1, velocityCallback);
+//    ros::Subscriber odom_sub = nh.subscribe("/Bebop2/position_velocity_orientation_estimation", 1, odomCallback);
+
 
     att_ctrl_pub = nh.advertise<mavros_msgs::AttitudeTarget>("/mavros/setpoint_raw/attitude", 1);
     odom_sp_enu_pub = nh.advertise<nav_msgs::Odometry>("/odom_sp_enu", 1);

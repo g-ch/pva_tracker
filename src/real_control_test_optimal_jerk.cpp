@@ -121,28 +121,16 @@ int main(int argc, char** argv) {
 
     pva_pub = nh.advertise<trajectory_msgs::JointTrajectoryPoint>("/pva_setpoint", 1);
 
-    ros::ServiceClient arming_client = nh.serviceClient<mavros_msgs::CommandBool>
-            ("mavros/cmd/arming");
-    ros::ServiceClient set_mode_client = nh.serviceClient<mavros_msgs::SetMode>
-            ("mavros/set_mode");
 
     const int LOOPRATE = 40;
     ros::Rate loop_rate(LOOPRATE);
 
-    // wait for FCU connection
+    /// Wait for FCU connection
     while(ros::ok() && !current_state.connected){
         ros::spinOnce();
         loop_rate.sleep();
     }
 
-    mavros_msgs::SetMode offb_set_mode;
-    offb_set_mode.request.custom_mode = "OFFBOARD";
-
-    mavros_msgs::CommandBool arm_cmd;
-    arm_cmd.request.value = true;
-    ros::Time last_request = ros::Time::now();
-
-    /// Take off with constant acceleration
     double delt_t = 1.0 / LOOPRATE;
     double yaw_target = M_PI / 2.0;
 
