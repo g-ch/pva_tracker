@@ -59,17 +59,8 @@ Run the following to start tracker and takeoff the drone when the mode is turned
 rosrun pva_tracker tracker_auto_takeoff_optitrack
 ```
 
-Now turn the flight mode to "OFFBOARD". The drone will take off, hover and wait for commands. Here we provide two nodes to generate some simple commands.
+Now turn the flight mode to "OFFBOARD". The drone will take off, hover and wait for pva commands. 
 
-run the following to hover (tracker must be started first)
-```
-rosrun pva_tracker optitrack_hover_test
-```
-
-run the following to fly to x=3 with minimum jerk trajectory (tracker must be started first)
-```
-rosrun pva_tracker optitrack_control_test
-```
 
 ## Run pva_tracker in an onboard computer
 In this case, you connect your onboard computer with your flight controller via usb_to_ttl module and Mavros. The estimated position and velocity are given by tracking camera, SLAM algorithms, or optitrack system. 
