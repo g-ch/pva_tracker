@@ -52,7 +52,7 @@ void setPVA(Eigen::Vector3d p, Eigen::Vector3d v, Eigen::Vector3d a, double yaw=
 
 
 int main(int argc, char** argv) {
-    ros::init(argc, argv, "sim_hover_test");
+    ros::init(argc, argv, "hover_test");
     ros::NodeHandle nh;
 
     ros::Subscriber state_sub = nh.subscribe<mavros_msgs::State>("/mavros/state", 1, stateCallback);
@@ -72,13 +72,18 @@ int main(int argc, char** argv) {
     double yaw_set = 0.0;
 
     ros::Rate loop_rate(20);
-    /** hover **/
+    /** Wait for offboard **/
     while(ros::ok()){
         setPVA(recorded_hover_position, v_set, a_set, yaw_set);//a_t.row(last_index));
+
+        if(current_state.mode != "OFFBOARD" || !current_state.armed){
+            recorded_hover_position << current_p(0), current_p(1), hover_height;
+        }
 
         loop_rate.sleep();
         ros::spinOnce();
     }
+
 
     return 0;
 }

@@ -54,26 +54,18 @@ void motion_primitives(Eigen::Vector3d p0, Eigen::Vector3d v0, Eigen::Vector3d a
                        Eigen::Vector3d pf, Eigen::Vector3d vf, Eigen::Vector3d af, double v_max, double delt_t,
                        Eigen::MatrixXd &p, Eigen::MatrixXd &v, Eigen::MatrixXd &a, Eigen::VectorXd &t)
 {
-    // % Choose the time as running in average velocity
-    // double decay_parameter = 0.5;
-    // double T = 0.2;
 
-    double j_limit = 5;
-    double a_limit = 3;
+    double a_limit = 2;
     double v_limit = v_max;
 
-//    double T1 = fabs(af(0)-a0(0))/j_limit > fabs(af(1)-a0(1))/j_limit ? fabs(af(0)-a0(0))/j_limit : fabs(af(1)-a0(1))/j_limit;
-//    T1 = T1 > fabs(af(2)-a0(2))/j_limit ? T1 : fabs(af(2)-a0(2))/j_limit;
     double T2 = fabs(vf(0)-v0(0))/a_limit > fabs(vf(1)-v0(1))/a_limit ? fabs(vf(0)-v0(0))/a_limit : fabs(vf(1)-v0(1))/a_limit;
     T2 = T2 > fabs(vf(2)-v0(2))/a_limit ? T2 : fabs(vf(2)-v0(2))/a_limit;
     double T3 = fabs(pf(0)-p0(0))/v_limit > fabs(pf(1)-p0(1))/v_limit ? fabs(pf(0)-p0(0))/v_limit : fabs(pf(1)-p0(1))/v_limit;
     T3 = T3 > fabs(pf(2)-p0(2))/v_limit ? T3 : fabs(pf(2)-p0(2))/v_limit;
 
-//    double T = T1 > T2 ? T1 : T2;
-//    T = T > T3 ? T : T3;
     double T = T2;
     T = T > T3 ? T : T3;
-    T = T < 0.3 ? 0.3 : T;
+    T = T < 0.5 ? 0.5 : T;
 
 //    ROS_INFO_THROTTLE(2, "T=%lf", T);
 
@@ -141,6 +133,14 @@ int main(int argc, char** argv) {
     ros::ServiceClient set_mode_client = nh.serviceClient<mavros_msgs::SetMode>
             ("mavros/set_mode");
 
+
+    double circle_radius = 1.5;
+    double circle_speed = 2.0;
+
+    double take_off_height = 1.2;
+    double take_off_acc = 1.0;
+
+
     const int LOOPRATE = 40;
     ros::Rate loop_rate(LOOPRATE);
 
@@ -158,42 +158,23 @@ int main(int argc, char** argv) {
     ros::Time last_request = ros::Time::now();
 
     /// Take off with constant acceleration
-    double take_off_height = 2.0;
-    double take_off_acc = 1.0;
-
     double take_off_time_half = sqrt(take_off_height/take_off_acc);
     double delt_t = 1.0 / LOOPRATE;
     double take_off_send_times = take_off_time_half / delt_t * 2;
     int counter = 0;
     Vector3d recorded_takeoff_position(current_p(0), current_p(1), current_p(2));
 
-    double yaw_set = 0.0;
+    double yaw_set = -1.57;
 
     ROS_INFO("Arm and takeoff");
     while(ros::ok()){
-        if( current_state.mode != "OFFBOARD" &&
-            (ros::Time::now() - last_request > ros::Duration(5.0))){
-            if( set_mode_client.call(offb_set_mode) &&
-                offb_set_mode.response.mode_sent){
-                ROS_INFO("Offboard enabled");
-            }
-            last_request = ros::Time::now();
-        } else {
-            if( !current_state.armed &&
-                (ros::Time::now() - last_request > ros::Duration(5.0))){
-                if( arming_client.call(arm_cmd) &&
-                    arm_cmd.response.success){
-                    ROS_INFO("Vehicle armed");
-                }
-                last_request = ros::Time::now();
-            }
-        }
 
         trajectory_msgs::JointTrajectoryPoint pva_setpoint;
 
 
 
         if(current_state.mode != "OFFBOARD" || !current_state.armed){
+            recorded_takeoff_position = current_p;
             setPVA(current_p, Vector3d::Zero(), Vector3d::Zero(), yaw_set);
         }else{
             counter ++;
@@ -221,7 +202,7 @@ int main(int argc, char** argv) {
             }
         }
 
-        if(current_p(2) > take_off_height-0.05){
+        if(current_p(2) > take_off_height-0.4){
             ROS_WARN("Takeoff Complete!");
             break;
         }
@@ -232,8 +213,6 @@ int main(int argc, char** argv) {
 
 
     /** Take off complete. Go to a point with minimum jerk trajectory **/
-    double circle_radius = 1.8;
-
     MatrixXd p_t, v_t, a_t;
     Eigen::VectorXd t_vector;
     Vector3d v0(0.0, 0.0, 0.0);
@@ -243,7 +222,7 @@ int main(int argc, char** argv) {
     Vector3d vf(0, 0, 0);
     Vector3d af(0, 0, 0);
 
-    motion_primitives(current_p, v0, a0, pf, vf, af, 3.0, delt_t, p_t, v_t, a_t, t_vector);
+    motion_primitives(current_p, v0, a0, pf, vf, af, 2.0, delt_t, p_t, v_t, a_t, t_vector);
 
     for(int i=0; i<t_vector.size(); i++)
     {
@@ -251,23 +230,26 @@ int main(int argc, char** argv) {
         loop_rate.sleep();
         ros::spinOnce();
     }
-
+    int wait_counter = 0;
     while(ros::ok())
     {
         setPVA(p_t.row(t_vector.size()-1), v_t.row(t_vector.size()-1), Vector3d::Zero(), yaw_set);// a_t.row(i));
         Vector3d last_sp_p = p_t.row(t_vector.size()-1);
         Vector3d delt_p = last_sp_p - current_p;
-        if(delt_p.norm() < 1.0){
-            ROS_WARN("Align Complete!");
-            break;
+        if(delt_p.norm() < 0.5){
+	    wait_counter ++;
+            if(wait_counter > 80){
+		ROS_WARN("Align Complete!");
+                break;
+	    }
         }
 
         loop_rate.sleep();
         ros::spinOnce();
     }
 
+
     /** Accelerate period **/
-    double circle_speed = 5.0;
     double acc_t_total = 2 * circle_radius / circle_speed;
     int acc_times = acc_t_total / delt_t;
     double acc_a_value = circle_speed * circle_speed / 2 / circle_radius;

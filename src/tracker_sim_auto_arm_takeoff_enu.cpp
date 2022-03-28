@@ -78,12 +78,6 @@ void pvaCallback(const trajectory_msgs::JointTrajectoryPoint::ConstPtr& msg)
 
     mavros_msgs::AttitudeTarget att_setpoint;
 
-    /// NWU frame to ENU frame
-    // planned_p << -msg->positions[1], msg->positions[0], msg->positions[2];
-    // planned_yaw = msg->positions[3] + M_PI/2.0;
-    // planned_v << -msg->velocities[1], msg->velocities[0], msg->velocities[2];
-    // planned_a << -msg->accelerations[1], msg->accelerations[0], msg->accelerations[2];
-
     /// No coordinate transfer
     planned_p << msg->positions[0], msg->positions[1], msg->positions[2];
     planned_yaw = msg->positions[3];
