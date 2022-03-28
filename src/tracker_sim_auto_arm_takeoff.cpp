@@ -1,6 +1,9 @@
-//
-// Created by cc on 2020/8/4.
-//
+/*********************************
+ * Created by cc on 2020/8/4.
+ * This node arms the drone and set the mode to offboard.
+ * Then it waits for pva commands in ENU frame and generate attitude commands.
+ * IMPORTANT: Use this node only in simulation!
+ ********************************/
 
 #include <ros/ros.h>
 #include <trajectory_msgs/JointTrajectoryPoint.h>
@@ -148,23 +151,8 @@ void pvaCallback(const trajectory_msgs::JointTrajectoryPoint::ConstPtr& msg)
     }
 
     Vector3d a_des = a_des_no_gravity + GRAVITATIONAL_ACC * z_w_norm;
-
-   
-
     /// End
 
-//    Vector3d att_des_norm = a_des / a_des.norm();
-
-//    Quaterniond z_w_quat(0, 0, 0, 1.0);
-//    Quaterniond att_current_vector_quat = current_att * z_w_quat * current_att.inverse();
-//    Vector3d current_att_vector(att_current_vector_quat.x(), att_current_vector_quat.y(), att_current_vector_quat.z());
-
-//    Quaterniond att_des_q = Quaterniond::FromTwoVectors(z_w_norm, att_des_norm);
-
-//    //add yaw
-//    Quaterniond yaw_quat(cos(planned_yaw/2.0), att_des_norm(0)*sin(planned_yaw/2.0),
-//            att_des_norm(1)*sin(planned_yaw/2.0),att_des_norm(2)*sin(planned_yaw/2.0));
-//    att_des_q = yaw_quat * att_des_q;
 
     Eigen::Vector3d expected_thrust = a_des;
     double expected_yaw = planned_yaw;

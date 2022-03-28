@@ -1,15 +1,14 @@
-//
-// Created by cc on 2020/8/5.
-//
+/*********************************
+ * Created by cc on 2020/8/5.
+ * This file generates hovering commands
+ ********************************/
+
 
 #include <ros/ros.h>
 #include <trajectory_msgs/JointTrajectoryPoint.h>
 #include <geometry_msgs/PoseStamped.h>
-#include <math.h>
 #include <Eigen/Eigen>
 #include <mavros_msgs/State.h>
-#include <mavros_msgs/CommandBool.h>
-#include <mavros_msgs/SetMode.h>
 
 using namespace Eigen;
 
@@ -19,8 +18,7 @@ ros::Publisher pva_pub;
 
 void positionCallback(const geometry_msgs::PoseStamped::ConstPtr &msg)
 {
-    /// ENU frame to NWU
-    current_p << msg->pose.position.y, -msg->pose.position.x, msg->pose.position.z;
+    current_p << msg->pose.position.x, msg->pose.position.y, msg->pose.position.z;
 }
 
 void stateCallback(const mavros_msgs::State::ConstPtr &msg)
@@ -63,8 +61,10 @@ int main(int argc, char** argv) {
 
     /// Take off with constant acceleration
     double hover_height = 1.0;
+    if (nh.getParam("/hover_test/hover_height", hover_height)) {
+        ROS_INFO("get param hover_height: %f", hover_height);
+    }
 
-    int counter = 0;
     Vector3d recorded_hover_position(current_p(0), current_p(1), hover_height);
     Vector3d v_set(0.0, 0.0, 0.0);
     Vector3d a_set(0.0, 0.0, 0.0);

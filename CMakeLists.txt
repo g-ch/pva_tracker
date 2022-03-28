@@ -29,18 +29,13 @@ add_definitions(${EIGEN_DEFINITIONS})
 
 find_package(roslaunch)
 
-
 add_executable(tracker src/tracker.cpp)
 target_link_libraries(tracker ${catkin_LIBRARIES})
 add_dependencies(tracker ${PROJECT_NAME}_gencfg)
 
-add_executable(tracker_enu src/tracker_enu.cpp)
-target_link_libraries(tracker_enu ${catkin_LIBRARIES})
-add_dependencies(tracker_enu ${PROJECT_NAME}_gencfg)
-
-add_executable(tracker_sim_auto_arm_takeoff_enu src/tracker_sim_auto_arm_takeoff_enu.cpp)
-target_link_libraries(tracker_sim_auto_arm_takeoff_enu ${catkin_LIBRARIES})
-add_dependencies(tracker_sim_auto_arm_takeoff_enu ${PROJECT_NAME}_gencfg)
+add_executable(tracker_sim_auto_arm_takeoff src/tracker_sim_auto_arm_takeoff.cpp)
+target_link_libraries(tracker_sim_auto_arm_takeoff ${catkin_LIBRARIES})
+add_dependencies(tracker_sim_auto_arm_takeoff ${PROJECT_NAME}_gencfg)
 
 add_executable(control_test src/control_test.cpp)
 target_link_libraries(control_test ${catkin_LIBRARIES})

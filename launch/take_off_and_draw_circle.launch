@@ -1,0 +1,14 @@
+<launch>
+    <node pkg="pva_tracker" name="tracker" type="tracker" output="screen">
+    </node>
+
+    <node pkg="pva_tracker" name="control_test" type="control_test" output="screen">
+        <param name="circle_radius" value="1.5" />
+        <param name="circle_speed" value="2.0" />
+        <param name="take_off_height" value="1.5" />
+        <param name="take_off_acc" value="1.0" />
+        <param name="point_arrived_threshold" value="0.4" />
+        <param name="yaw_set" value="0.0" />
+    </node>
+
+</launch>

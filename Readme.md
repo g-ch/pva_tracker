@@ -1,4 +1,10 @@
-This package receives position, velocity, and acceleration commands and turn the commands to attitude and thrust setpoints. These setpoints will be sent to Mavros to control a PX4 drone. 
+This package contains a tracker that receives position, velocity, and acceleration commands and turn the commands to attitude and thrust setpoints. These setpoints will be sent to Mavros to control a PX4 drone. 
+
+__NOTE:__
+Before you use the tracker for a real drone, the parameter "hover_thrust_factor_min", "hover_thrust_factor_min", "flight_time_minute" and "stand_by_time_minute" in "cfg/pid.cfg" should be set to a right value.
+
+
+
 
 # Simulation
 

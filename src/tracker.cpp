@@ -1,6 +1,8 @@
-//
-// Created by cc on 2020/8/4.
-//
+/*********************************
+ * Created by cc on 2020/8/4.
+ * This node receives pva commands in ENU frame and generate attitude commands.
+ ********************************/
+
 
 #include <ros/ros.h>
 #include <trajectory_msgs/JointTrajectoryPoint.h>
@@ -71,11 +73,12 @@ void pvaCallback(const trajectory_msgs::JointTrajectoryPoint::ConstPtr& msg)
 {
     mavros_msgs::AttitudeTarget att_setpoint;
 
-    /// NWU frame to ENU frame
-    planned_p << -msg->positions[1], msg->positions[0], msg->positions[2];
-    planned_yaw = msg->positions[3] + M_PI/2.0;
-    planned_v << -msg->velocities[1], msg->velocities[0], msg->velocities[2];
-    planned_a << -msg->accelerations[1], msg->accelerations[0], msg->accelerations[2];
+
+    /// ENU frame
+    planned_p << msg->positions[0], msg->positions[1], msg->positions[2];
+    planned_yaw = msg->positions[3];
+    planned_v << msg->velocities[0], msg->velocities[1], msg->velocities[2];
+    planned_a << msg->accelerations[0], msg->accelerations[1], msg->accelerations[2];
 
 //    planned_p << msg->positions[0], msg->positions[1], msg->positions[2];
 //    planned_yaw = msg->positions[3];
@@ -275,7 +278,6 @@ int main(int argc, char** argv) {
     ros::Subscriber pva_sub = nh.subscribe("/pva_setpoint", 1, pvaCallback);
     ros::Subscriber position_sub = nh.subscribe("/mavros/local_position/pose", 1, positionCallback);
     ros::Subscriber velocity_sub = nh.subscribe("/mavros/local_position/velocity_local", 1, velocityCallback);
-//    ros::Subscriber odom_sub = nh.subscribe("/Bebop2/position_velocity_orientation_estimation", 1, odomCallback);
 
 
     att_ctrl_pub = nh.advertise<mavros_msgs::AttitudeTarget>("/mavros/setpoint_raw/attitude", 1);

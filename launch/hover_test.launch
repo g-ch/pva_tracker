@@ -1,0 +1,9 @@
+<launch>
+    <node pkg="pva_tracker" name="tracker" type="tracker" output="screen">
+    </node>
+
+    <node pkg="pva_tracker" name="hover_test" type="hover_test" output="screen">
+        <param name="hover_height" value="1.0" />
+    </node>
+
+</launch>

@@ -1,6 +1,12 @@
-//
-// Created by cc on 2020/8/5.
-//
+
+/*********************************
+ * Created by cc on 2020/8/5.
+ * This file generates trajectories with four stages when the drone is armed and set to offboard mode:
+ * 1. Take off
+ * 2. Get to a point (R, -R) by minimum jerk planner
+ * 3. Accelerte to v and get to point (R, 0)
+ * 4. Flight as a circle with radius R, Speed v.
+ ********************************/
 
 #include <ros/ros.h>
 #include <trajectory_msgs/JointTrajectoryPoint.h>
@@ -19,8 +25,8 @@ ros::Publisher pva_pub;
 
 void positionCallback(const geometry_msgs::PoseStamped::ConstPtr &msg)
 {
-    /// ENU frame to NWU
-    current_p << msg->pose.position.y, -msg->pose.position.x, msg->pose.position.z;
+    /// ENU frame
+    current_p << msg->pose.position.x, msg->pose.position.y, msg->pose.position.z;
 }
 
 void stateCallback(const mavros_msgs::State::ConstPtr &msg)
@@ -120,7 +126,7 @@ void compute_circular_traj(const double r, const double vel, const Eigen::Vector
 
 
 int main(int argc, char** argv) {
-    ros::init(argc, argv, "control");
+    ros::init(argc, argv, "control_test");
     ros::NodeHandle nh;
 
     ros::Subscriber state_sub = nh.subscribe<mavros_msgs::State>("/mavros/state", 1, stateCallback);
@@ -139,6 +145,28 @@ int main(int argc, char** argv) {
 
     double take_off_height = 1.2;
     double take_off_acc = 1.0;
+
+    double point_arrived_threshold = 0.3;
+    double yaw_set = 0.0;
+
+    if (nh.getParam("/control_test/circle_radius", circle_radius)) {
+        ROS_INFO("get param circle_radius: %f", circle_radius);
+    }
+    if (nh.getParam("/control_test/circle_speed", circle_speed)) {
+        ROS_INFO("get param circle_speed: %f", circle_speed);
+    }
+    if (nh.getParam("/control_test/take_off_height", take_off_height)) {
+        ROS_INFO("get param take_off_height: %f", take_off_height);
+    }
+    if (nh.getParam("/control_test/take_off_acc", take_off_acc)) {
+        ROS_INFO("get param take_off_acc: %f", take_off_acc);
+    }
+    if (nh.getParam("/control_test/point_arrived_threshold", point_arrived_threshold)) {
+        ROS_INFO("get param point_arrived_threshold: %f", point_arrived_threshold);
+    }
+    if (nh.getParam("/control_test/yaw_set", yaw_set)) {
+        ROS_INFO("get param yaw_set: %f", yaw_set);
+    }
 
 
     const int LOOPRATE = 40;
@@ -164,14 +192,11 @@ int main(int argc, char** argv) {
     int counter = 0;
     Vector3d recorded_takeoff_position(current_p(0), current_p(1), current_p(2));
 
-    double yaw_set = -1.57;
 
     ROS_INFO("Arm and takeoff");
     while(ros::ok()){
 
         trajectory_msgs::JointTrajectoryPoint pva_setpoint;
-
-
 
         if(current_state.mode != "OFFBOARD" || !current_state.armed){
             recorded_takeoff_position = current_p;
@@ -202,7 +227,7 @@ int main(int argc, char** argv) {
             }
         }
 
-        if(current_p(2) > take_off_height-0.4){
+        if(current_p(2) > take_off_height-0.2){
             ROS_WARN("Takeoff Complete!");
             break;
         }
@@ -236,7 +261,7 @@ int main(int argc, char** argv) {
         setPVA(p_t.row(t_vector.size()-1), v_t.row(t_vector.size()-1), Vector3d::Zero(), yaw_set);// a_t.row(i));
         Vector3d last_sp_p = p_t.row(t_vector.size()-1);
         Vector3d delt_p = last_sp_p - current_p;
-        if(delt_p.norm() < 0.5){
+        if(delt_p.norm() < point_arrived_threshold){
 	    wait_counter ++;
             if(wait_counter > 80){
 		ROS_WARN("Align Complete!");
