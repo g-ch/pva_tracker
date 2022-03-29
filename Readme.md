@@ -87,7 +87,7 @@ Therefore, __Never change any parameter when the drone is flying.__
 
 Changes through `rqt_reconfigure` will not be saved when ROS is shut down.
 Therefore, save the parameters as a yaml file so that you can reload the parameters with rqt_reconfigure next time.
-You can also change the default parameters in `cfg/pid.cfg`. Changes to `cfg/pid.cfg` require recompilation and restarting ROS to take effect.
+When you have finished parameter tuning, you can change the default parameters in `cfg/pid.cfg`. Changes to `cfg/pid.cfg` require recompilation and restarting ROS to take effect.
 
 
 
