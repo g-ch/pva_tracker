@@ -60,16 +60,15 @@ int main(int argc, char** argv) {
 
 
     /// Take off with constant acceleration
-    double hover_height = 1.0;
-    if (nh.getParam("/hover_test/hover_height", hover_height)) {
-        ROS_INFO("get param hover_height: %f", hover_height);
+    double yaw_set = 0.0;
+    if (nh.getParam("/hover_test/yaw_set", yaw_set)) {
+        ROS_INFO("get param hover_height: %f", yaw_set);
     }
 
-    Vector3d recorded_hover_position(current_p(0), current_p(1), hover_height);
+    Vector3d recorded_hover_position(current_p(0), current_p(1), current_p(2));
     Vector3d v_set(0.0, 0.0, 0.0);
     Vector3d a_set(0.0, 0.0, 0.0);
 
-    double yaw_set = 0.0;
 
     ros::Rate loop_rate(20);
     /** Wait for offboard **/
@@ -77,7 +76,7 @@ int main(int argc, char** argv) {
         setPVA(recorded_hover_position, v_set, a_set, yaw_set);//a_t.row(last_index));
 
         if(current_state.mode != "OFFBOARD" || !current_state.armed){
-            recorded_hover_position << current_p(0), current_p(1), hover_height;
+            recorded_hover_position << current_p(0), current_p(1), current_p(2);
         }
 
         loop_rate.sleep();

@@ -3,7 +3,7 @@
     </node>
 
     <node pkg="pva_tracker" name="hover_test" type="hover_test" output="screen">
-        <param name="hover_height" value="1.0" />
+        <param name="yaw_set" value="0" />
     </node>
 
 </launch>

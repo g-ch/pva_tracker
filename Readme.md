@@ -1,84 +1,93 @@
-This package contains a tracker that receives position, velocity, and acceleration commands and turn the commands to attitude and thrust setpoints. These setpoints will be sent to Mavros to control a PX4 drone. 
+# Introduction
+
+This package contains a tracker that receives position, velocity, and acceleration commands and turns the commands to attitude and thrust setpoints.
+These setpoints will be sent to Mavros to control a PX4 drone.
+So Mavros should be started before using this tracker.
 
 __NOTE:__
-Before you use the tracker for a real drone, the parameter "hover_thrust_factor_min", "hover_thrust_factor_min", "flight_time_minute" and "stand_by_time_minute" in "cfg/pid.cfg" should be set to a right value.
+Before you use the tracker for a real drone, the parameter `hover_thrust_factor_min, hover_thrust_factor_max, "flight_time_minute` and `stand_by_time_minute` in `cfg/pid.cfg` should be set to a right value.
+
++ "flight_time_minute" and "stand_by_time_minute" are the maximum flight time and maximum stand-by time (when the drone is disarmed but the onboard computer is running.)
+
+
++ "hover_thrust_factor_min" and "hover_thrust_factor_max" correspond to the hover thrust factor when the battery is fully charged and almost empty.
+  Our hover thrust is `px4's hover thrust / 9.8`.
 
 
 
-
-# Simulation
-
-See the below website to learn more about simulation:
-https://dev.px4.io/v1.9.0/en/simulation/ros_interface.html
-
-## Start simulation world
-Open the folder of PX4 code and run:
-
+# Compile
+Clone to your ROS workspace and run
 ```
-source Tools/setup_gazebo.bash $(pwd) $(pwd)/build/px4_sitl_default
-export ROS_PACKAGE_PATH=$ROS_PACKAGE_PATH:$(pwd)
-export ROS_PACKAGE_PATH=$ROS_PACKAGE_PATH:$(pwd)/Tools/sitl_gazebo
-
-make px4_sitl_default gazebo
+catkin_make
 ```
-
-## Start mavros:
+or
 ```
-roslaunch mavros px4.launch fcu_url:="udp://:14540@127.0.0.1:14557"
+catkin build
 ```
 
-## Start tracker by:
-```
-rosrun pva_tracker tracker 
-```
+# Usage
 
-or run "tracker_sim_auto_arm_takeoff" to arm and hover before waiting for position, velocity, and acceleration commands.
+## Nodes Introduction
+Two nodes for the tracker:
 
-```
-rosrun pva_tracker tracker_sim_auto_arm_takeoff
-```
-
-##  Test flight
-run the following to accelerate and fly as a circle (tracker must be started first)
-```
-rosrun pva_tracker sim_control_test
-```
-
-run the following to hover
-```
-rosrun pva_tracker sim_hover_test
-```
-
-##  Tune PID parameters:
-```
-rosrun rqt_reconfigure rqt_reconfigure 
-```
-
-# Real world test
-In real world tests, do not use auto arm with code. Always arm and change mode with a remote controller.
-
-## Run pva_tracker in a laptop
-In this case, you connect your laptop with your drone via wifi/telemetry and Mavros. The estimated position and velocity are given by optitrack system.
-
-Run the following to start tracker and takeoff the drone when the mode is turned to "offboard".
-```
-rosrun pva_tracker tracker_auto_takeoff_optitrack
-```
-
-Now turn the flight mode to "OFFBOARD". The drone will take off, hover and wait for pva commands. 
++ tracker: receive position, velocity, and acceleration commands and publish attitude and thrust commands. The topic name is `/pva_setpoint`. The message type is `trajectory_msgs::JointTrajectoryPoint`, where the fourth element in the position vector is yaw setpoint.
 
 
-## Run pva_tracker in an onboard computer
-In this case, you connect your onboard computer with your flight controller via usb_to_ttl module and Mavros. The estimated position and velocity are given by tracking camera, SLAM algorithms, or optitrack system. 
++ tracker_sim_auto_arm_takeoff: __Use this node only in simulation.__ This node will arm and take off the drone automatically and wait for the same commands as the tracker node uses.
 
-Run the following to start tracker:
+
+Two nodes to generate hover commands or simple trajectories. These two nodes only work when one of the above nodes has been started.
+
++ hover_test: record the position when the drone is set to `OFFBOARD` mode and hover.
+
+
++ control_test: generates trajectories with four stages when the drone is armed and set to offboard mode:
+    1. Takeoff
+    2. Get to a point (R, -R) by minimum jerk planner
+    3. Accelerate to v and get to point (R, 0)
+    4. Continuously fly as a circle with radius R, Speed v.
+
+
+## Run
+1.Run the tracker by:
 ```
 rosrun pva_tracker tracker
 ```
 
-Run your own planning algorithms and publish position, velocity, and acceleration commands with message type "trajectory_msgs/JointTrajectoryPoint" and topic name "/pva_setpoint".
+or (only in simulation)
+```
+rosrun pva_tracker tracker_sim_auto_arm_takeoff
+```
+Then you can run your planner to generate pva commands.
 
 
+2.If you want to test basic hovering performance in OFFBOARD mode, launch by
+```
+roslaunch pva_tracker hover_test.launch
+```
+Then fly your drone to a desired position and switch to OFFBOARD mode. If the parameters are good, the drone will hover at the position.
+The yaw direction depends on a parameter you set in the launch file.
+__The default yaw is zero.__
+
+
+3.If you want to test auto takeoff and draw a circle with the control_test node, launch by
+```
+roslaunch pva_tracker take_off_and_draw_circle.launch
+```
+__Parameters like circle radius and flight speed can be set in the launch file.__
+
+##  Tune PID parameters:
+The default parameters are stored in `cfg/pid.cfg`.
+You can tune the parameter using a rqt tool:
+```
+rosrun rqt_reconfigure rqt_reconfigure 
+```
+When you change any parameter with the rqt_reconfigure, the changing takes effect immediately.
+Therefore, __Never change any parameter when the drone is flying.__
+
+Changes through `rqt_reconfigure` will not be saved when ROS is shut down.
+Therefore, save the parameters as a yaml file so that you can reload the parameters with rqt_reconfigure next time.
+You can also change the default parameters in `cfg/pid.cfg`. Changes to `cfg/pid.cfg` require recompilation and restarting ROS to take effect.
 
 
 
